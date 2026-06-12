@@ -1,76 +1,19 @@
 "use client"
 import { useState, useEffect } from "react"
-
-// ─── Mock Data ───────────────────────────────────────────────
-
-const STATS = [
-  { label: "Active Screens",    value: "1,284",  delta: "+12 this week",  accent: false },
-  { label: "Live Campaigns",    value: "47",     delta: "+3 today",       accent: true  },
-  { label: "Impressions Today", value: "2.4M",   delta: "↑ 18% vs. avg", accent: false },
-  { label: "Revenue (MTD)",     value: "KSh 3.8M", delta: "On track",    accent: false },
-]
-
-const CAMPAIGNS = [
-  { id: "C-001", name: "Safaricom 5G Launch",     client: "Safaricom PLC",   screens: 84, status: "live",      impressions: "428K",  budget: "KSh 480K"  },
-  { id: "C-002", name: "KCB Bank — Q3 Promo",    client: "KCB Group",       screens: 36, status: "live",      impressions: "201K",  budget: "KSh 220K"  },
-  { id: "C-003", name: "Tusker Oktoberfest",      client: "EABL",            screens: 52, status: "live",      impressions: "315K",  budget: "KSh 380K"  },
-  { id: "C-004", name: "Equity Bank SME Drive",   client: "Equity Group",    screens: 28, status: "paused",    impressions: "88K",   budget: "KSh 150K"  },
-  { id: "C-005", name: "Nation Media OOH",        client: "Nation Media Grp",screens: 19, status: "scheduled", impressions: "—",     budget: "KSh 95K"   },
-  { id: "C-006", name: "Airtel Unlimited Data",   client: "Airtel Kenya",    screens: 62, status: "live",      impressions: "371K",  budget: "KSh 340K"  },
-  { id: "C-007", name: "Bamburi Cement Relaunch", client: "Bamburi Cement",  screens: 14, status: "draft",     impressions: "—",     budget: "KSh 75K"   },
-]
-
-const SCREENS = [
-  { id: "SCR-001", name: "CBD Moi Ave",       location: "Nairobi CBD",        status: "online",  fill: 92 },
-  { id: "SCR-002", name: "Westlands Roundabout", location: "Westlands",      status: "online",  fill: 78 },
-  { id: "SCR-003", name: "Junction Mall Entrance", location: "Ngong Road",   status: "online",  fill: 85 },
-  { id: "SCR-004", name: "Karen Hub Billboard",  location: "Karen",           status: "offline", fill: 0  },
-  { id: "SCR-005", name: "Uhuru Hwy Overpass",   location: "Industrial Area", status: "online",  fill: 100},
-  { id: "SCR-006", name: "Gikomba Market Gate",  location: "Eastlands",       status: "online",  fill: 55 },
-]
+import Image from "next/image"
+// ─── Ticker ──────────────────────────────────────────────────
 
 const TICKER_ITEMS = [
-  "1,284 screens online",
+  "1,284 screens online across Kenya",
   "KSh 3.8M revenue MTD",
   "47 active campaigns",
   "2.4M impressions today",
   "99.2% network uptime",
-  "12 new screens added",
   "Nairobi · Mombasa · Kisumu · Eldoret",
 ]
 
-type CampaignStatus = "live" | "paused" | "draft" | "scheduled" | "ended"
-type ScreenStatus   = "online" | "offline" | "maintenance"
-
-// ─── Status Helpers ──────────────────────────────────────────
-
-function StatusBadge({ status }: { status: CampaignStatus }) {
-  const map = {
-    live:      { label: "Live",      cls: "badge-live"    },
-    paused:    { label: "Paused",    cls: "badge-paused"  },
-    draft:     { label: "Draft",     cls: "badge-draft"   },
-    scheduled: { label: "Scheduled", cls: "badge-accent"  },
-    ended:     { label: "Ended",     cls: "badge-draft"   },
-  }
-  const { label, cls } = map[status]
-  return <span className={`badge ${cls}`}>{label}</span>
-}
-
-function ScreenDot({ status }: { status: ScreenStatus }) {
-  const color = status === "online" ? "#00e676" : status === "offline" ? "#ff4444" : "#ffc107"
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "rgba(240,240,240,0.55)" }}>
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, display: "inline-block",
-        boxShadow: status === "online" ? `0 0 6px ${color}` : "none" }} />
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  )
-}
-
-// ─── Ticker ──────────────────────────────────────────────────
-
 function Ticker() {
-  const items = [...TICKER_ITEMS, ...TICKER_ITEMS] // doubled for seamless loop
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS]
   return (
     <div className="ticker-wrap">
       <div className="ticker-track">
@@ -85,18 +28,188 @@ function Ticker() {
   )
 }
 
+// ─── Network Showcase ────────────────────────────────────────────────────────
+
+type CampaignStatus = "live" | "draft" | "coming"
+
+function StatusBadge({ status }: { status: CampaignStatus }) {
+  const statusMap = {
+    live: { label: "Live", className: "badge badge-live" },
+    draft: { label: "Draft", className: "badge badge-draft" },
+    coming: { label: "Soon", className: "badge badge-draft" },
+  }
+
+  const { label, className } = statusMap[status]
+
+  return <span className={className}>{label}</span>
+}
+
+const SHOWCASE_SCREENS = [
+  {
+    id: 1,
+    name: "CBD Moi Ave",
+    location: "Nairobi CBD",
+    type: "Billboard",
+    status: "live" as CampaignStatus,
+    img: "https://images.unsplash.com/photo-1509391111902-de5b6f692025?w=800&q=80",
+  },
+  {
+    id: 2,
+    name: "Westlands Roundabout",
+    location: "Westlands",
+    type: "Digital Billboard",
+    status: "live" as CampaignStatus,
+    img: "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=800&q=80",
+  },
+  {
+    id: 3,
+    name: "Junction Mall Entrance",
+    location: "Ngong Road",
+    type: "Mall Screen",
+    status: "live" as CampaignStatus,
+    img: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80",
+  },
+  {
+    id: 4,
+    name: "Uhuru Hwy Overpass",
+    location: "Industrial Area",
+    type: "Billboard",
+    status: "live" as CampaignStatus,
+    img: "https://images.unsplash.com/photo-1598128558393-70ff21433be0?w=800&q=80",
+  },
+  {
+    id: 5,
+    name: "Gikomba Market Gate",
+    location: "Eastlands",
+    type: "Transit",
+    status: "live" as CampaignStatus,
+    img: "https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?w=800&q=80",
+  },
+  {
+    id: 6,
+    name: "Karen Hub Billboard",
+    location: "Karen",
+    type: "Billboard",
+    status: "draft" as CampaignStatus,
+    img: "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=800&q=80",
+  },
+]
+
+function NetworkShowcase() {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Section header */}
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+        <div>
+          <p className="t-label" style={{ marginBottom: 6 }}>Live Network</p>
+          <h2 className="t-heading">Screen Showcase</h2>
+        </div>
+        <button className="btn btn-ghost btn-sm" style={{ color: "var(--accent)" }}>
+          View all screens →
+        </button>
+      </div>
+
+      {/* Photo grid */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 16,
+      }}>
+        {SHOWCASE_SCREENS.map((screen) => (
+          <div
+            key={screen.id}
+            className="screen-thumb"
+            style={{
+              position: "relative",
+              borderRadius: "var(--radius-lg)",
+              overflow: "hidden",
+              cursor: "pointer",
+              border: "1px solid var(--border-subtle)",
+              aspectRatio: "16/9",
+            }}
+          >
+            {/* Photo */}
+            <Image
+              src={screen.img}
+              alt={`${screen.name} DOOH screen`}
+              fill
+              sizes="(max-width: 1280px) 33vw, 400px"
+              style={{ objectFit: "cover" }}
+            />
+
+            {/* Cinematic dark overlay — stronger at bottom for text legibility */}
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.18) 55%, rgba(0,0,0,0) 100%)",
+            }} />
+
+            {/* Live glow border when active */}
+            {screen.status === "live" && (
+              <div style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: "var(--radius-lg)",
+                boxShadow: "inset 0 0 0 1px rgba(0,230,118,0.35)",
+                pointerEvents: "none",
+              }} />
+            )}
+
+            {/* Bottom info */}
+            <div style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: "12px 14px",
+              display: "flex",
+              alignItems: "flex-end",
+              justifyContent: "space-between",
+            }}>
+              <div>
+                <p style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "#fff",
+                  letterSpacing: "-0.01em",
+                  marginBottom: 2,
+                }}>
+                  {screen.name}
+                </p>
+                <p style={{
+                  fontSize: 11,
+                  color: "rgba(255,255,255,0.6)",
+                  letterSpacing: "0.04em",
+                }}>
+                  {screen.location} · {screen.type}
+                </p>
+              </div>
+              <StatusBadge status={screen.status} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+
 // ─── Nav ─────────────────────────────────────────────────────
 
-function Nav({ activeSection, setActiveSection }: {
-  activeSection: string
-  setActiveSection: (s: string) => void
-}) {
-  const links = ["Dashboard", "Campaigns", "Screens", "Analytics", "Creatives"]
+function Nav() {
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 20)
+    window.addEventListener("scroll", fn)
+    return () => window.removeEventListener("scroll", fn)
+  }, [])
+
   return (
-    <nav className="nav">
+    <nav className="nav" style={{ borderBottom: scrolled ? "1px solid var(--border-subtle)" : "1px solid transparent" }}>
       <div className="nav-inner">
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: "auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: 28, height: 28, borderRadius: 6,
             background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center"
@@ -112,333 +225,462 @@ function Nav({ activeSection, setActiveSection }: {
           <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, letterSpacing: "-0.02em" }}>
             DOOH<span style={{ color: "var(--accent)" }}>.</span>
           </span>
-          <span className="badge badge-live" style={{ marginLeft: 4 }}>Live</span>
         </div>
 
         {/* Links */}
-        <div style={{ display: "flex", gap: 2 }}>
-          {links.map(link => (
-            <button key={link}
-              onClick={() => setActiveSection(link)}
-              style={{
-                background: "none", border: "none", cursor: "pointer",
-                padding: "6px 14px",
-                fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 500,
-                color: activeSection === link ? "var(--text-primary)" : "var(--text-secondary)",
-                borderRadius: "var(--radius-md)",
-                background: activeSection === link ? "var(--bg-elevated)" : "transparent",
-                transition: "all var(--transition-fast)",
-              }}>
-              {link}
-            </button>
+        <div style={{ display: "flex", gap: 2, margin: "0 auto" }}>
+          {["Product", "Network", "Pricing", "Case Studies", "About"].map(link => (
+            <a key={link} href="#" style={{
+              padding: "6px 14px",
+              fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 500,
+              color: "var(--text-secondary)",
+              borderRadius: "var(--radius-md)",
+              textDecoration: "none",
+              transition: "color var(--transition-fast)",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--text-primary)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-secondary)")}
+            >{link}</a>
           ))}
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
-          <button className="btn btn-secondary btn-sm">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            Search
-          </button>
-          <button className="btn btn-primary btn-sm">+ New Campaign</button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="btn btn-secondary btn-sm">Log in</button>
+          <button className="btn btn-primary btn-sm">Get Started →</button>
         </div>
       </div>
     </nav>
   )
 }
 
-// ─── Dashboard View ──────────────────────────────────────────
+// ─── Hero ─────────────────────────────────────────────────────
 
-function Dashboard() {
+function Hero() {
   const [time, setTime] = useState<Date | null>(null)
   useEffect(() => {
+    setTime(new Date())
     const t = setInterval(() => setTime(new Date()), 1000)
     return () => clearInterval(t)
   }, [])
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+    <section style={{
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
+      padding: "120px var(--space-8) 80px",
+      position: "relative",
+      overflow: "hidden",
+    }}>
+      {/* Background glow */}
+      <div style={{
+        position: "absolute", top: "20%", left: "50%", transform: "translateX(-50%)",
+        width: 600, height: 600, borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(200,255,0,0.06) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
 
-      {/* Page header */}
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-        <div>
-          <p className="t-label" style={{ marginBottom: 8 }}>Overview</p>
-          <h1 className="t-heading-lg">Dashboard</h1>
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: 22, fontWeight: 700,
-            letterSpacing: "-0.02em", color: "var(--text-primary)" }}>
-            {time ? time.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : ""}
-          </p>
-          <p className="t-body-sm">Nairobi, Kenya · EAT (UTC+3)</p>
-        </div>
+      {/* Live badge */}
+      <div style={{ marginBottom: 32 }}>
+        <span className="badge badge-live">
+          Live Network — {time ? time.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" }) : "—"} EAT
+        </span>
       </div>
 
-      {/* Stats grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
-        {STATS.map((s, i) => (
-          <div key={i} className="stat-card" style={s.accent ? { borderColor: "rgba(200,255,0,0.2)", background: "var(--accent-glow)" } : {}}>
-            <p className="stat-card-label">{s.label}</p>
-            <p className="stat-card-value" style={s.accent ? { color: "var(--accent)" } : {}}>{s.value}</p>
-            <p className="stat-card-delta">{s.delta}</p>
+      {/* Headline */}
+      <h1 style={{
+        fontFamily: "var(--font-display)",
+        fontSize: "clamp(48px, 8vw, 96px)",
+        fontWeight: 700,
+        lineHeight: 1.0,
+        letterSpacing: "-0.04em",
+        color: "var(--text-primary)",
+        maxWidth: 900,
+        marginBottom: 28,
+      }}>
+        Kenya&apos;s Most Powerful<br />
+        <span style={{ color: "var(--accent)" }}>Digital OOH</span> Platform
+      </h1>
+
+      {/* Sub */}
+      <p style={{
+        fontFamily: "var(--font-body)",
+        fontSize: "clamp(16px, 2vw, 20px)",
+        color: "var(--text-secondary)",
+        maxWidth: 560,
+        lineHeight: 1.65,
+        marginBottom: 48,
+      }}>
+        Launch, manage, and measure billboard campaigns across 1,284 premium digital screens — from Nairobi CBD to the Coast.
+      </p>
+
+      {/* CTAs */}
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 80 }}>
+        <button className="btn btn-primary btn-lg">Start a Campaign →</button>
+        <button className="btn btn-secondary btn-lg">View Our Network</button>
+      </div>
+
+      {/* Hero stats strip */}
+      <div style={{
+        display: "flex",
+        gap: 0,
+        border: "1px solid var(--border-subtle)",
+        borderRadius: "var(--radius-xl)",
+        overflow: "hidden",
+        background: "var(--bg-surface)",
+      }}>
+        {[
+          { value: "1,284", label: "Digital Screens" },
+          { value: "47+", label: "Cities & Towns" },
+          { value: "2.4M", label: "Daily Impressions" },
+          { value: "99.2%", label: "Network Uptime" },
+        ].map((s, i, arr) => (
+          <div key={i} style={{
+            padding: "24px 40px",
+            borderRight: i < arr.length - 1 ? "1px solid var(--border-subtle)" : "none",
+            textAlign: "center",
+          }}>
+            <p style={{
+              fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700,
+              letterSpacing: "-0.03em", color: "var(--text-primary)", marginBottom: 4,
+            }}>{s.value}</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600 }}>{s.label}</p>
           </div>
         ))}
       </div>
-
-      {/* Two-column: campaigns + screens */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24 }}>
-
-        {/* Campaigns table */}
-        <div className="card">
-          <div className="card-body" style={{ paddingBottom: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-              <div>
-                <p className="t-label" style={{ marginBottom: 4 }}>Active Campaigns</p>
-                <p className="t-subheading">47 running across network</p>
-              </div>
-              <button className="btn btn-ghost btn-sm" style={{ color: "var(--accent)" }}>View all →</button>
-            </div>
-          </div>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Campaign</th>
-                <th>Screens</th>
-                <th>Impressions</th>
-                <th>Budget</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {CAMPAIGNS.map(c => (
-                <tr key={c.id} style={{ cursor: "pointer" }}>
-                  <td>
-                    <div style={{ fontWeight: 500, fontSize: 13, color: "var(--text-primary)", marginBottom: 2 }}>{c.name}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>{c.client}</div>
-                  </td>
-                  <td style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{c.screens}</td>
-                  <td style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{c.impressions}</td>
-                  <td style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{c.budget}</td>
-                  <td><StatusBadge status={c.status as CampaignStatus} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Screen status panel */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-          {/* Network health */}
-          <div className="card-elevated" style={{ padding: 20 }}>
-            <p className="t-label" style={{ marginBottom: 12 }}>Network Health</p>
-            <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-              <div style={{ flex: 1, textAlign: "center" }}>
-                <p style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--status-live)", letterSpacing: "-0.03em" }}>99.2%</p>
-                <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>UPTIME</p>
-              </div>
-              <div style={{ width: 1, background: "var(--border-subtle)" }} />
-              <div style={{ flex: 1, textAlign: "center" }}>
-                <p style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em" }}>1,271</p>
-                <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>ONLINE</p>
-              </div>
-              <div style={{ width: 1, background: "var(--border-subtle)" }} />
-              <div style={{ flex: 1, textAlign: "center" }}>
-                <p style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--status-error)", letterSpacing: "-0.03em" }}>13</p>
-                <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>OFFLINE</p>
-              </div>
-            </div>
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: "99.2%" }} />
-            </div>
-          </div>
-
-          {/* Screen list */}
-          <div className="card" style={{ flex: 1 }}>
-            <div style={{ padding: "16px 20px 0" }}>
-              <p className="t-label" style={{ marginBottom: 12 }}>Screen Status</p>
-            </div>
-            <div>
-              {SCREENS.map((s, i) => (
-                <div key={s.id} style={{
-                  padding: "12px 20px",
-                  borderBottom: i < SCREENS.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  cursor: "pointer", transition: "background var(--transition-fast)",
-                }}>
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", marginBottom: 2 }}>{s.name}</p>
-                    <p style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.04em" }}>{s.location}</p>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
-                    <ScreenDot status={s.status as ScreenStatus} />
-                    {s.status === "online" && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                        <div style={{ width: 48, height: 2, background: "var(--border-subtle)", borderRadius: 99 }}>
-                          <div style={{ height: "100%", width: `${s.fill}%`,
-                            background: s.fill === 100 ? "var(--accent)" : "var(--status-live)",
-                            borderRadius: 99, transition: "width 0.6s ease" }} />
-                        </div>
-                        <span style={{ fontSize: 10, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>{s.fill}%</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom strip — activity log */}
-      <div className="card" style={{ padding: "20px 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <p className="t-label">Recent Activity</p>
-          <button className="btn btn-ghost btn-sm" style={{ color: "var(--accent)" }}>View log →</button>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "var(--border-subtle)" }}>
-          {[
-            { time: "14:32", msg: "Safaricom 5G — creative updated", type: "info" },
-            { time: "13:58", msg: "SCR-004 Karen Hub went offline", type: "error" },
-            { time: "13:41", msg: "KCB Q3 Promo impressions hit 200K", type: "success" },
-            { time: "12:20", msg: "Airtel Unlimited — 3 new screens added", type: "info" },
-            { time: "11:55", msg: "Nation Media OOH scheduled for Mon", type: "info" },
-            { time: "10:30", msg: "Equity Bank campaign paused by client", type: "warn" },
-          ].map((a, i) => (
-            <div key={i} style={{ background: "var(--bg-surface)", padding: "12px 16px" }}>
-              <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <div style={{ width: 6, height: 6, borderRadius: "50%", marginTop: 4, flexShrink: 0,
-                  background: a.type === "error" ? "var(--status-error)" : a.type === "success" ? "var(--status-live)" : a.type === "warn" ? "var(--status-paused)" : "var(--text-muted)" }} />
-                <div>
-                  <p style={{ fontSize: 12, color: "var(--text-primary)", marginBottom: 2 }}>{a.msg}</p>
-                  <p style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>Today · {a.time}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-    </div>
+    </section>
   )
 }
 
-// ─── Placeholder Views ────────────────────────────────────────
+// ─── Features ─────────────────────────────────────────────────
 
-function Placeholder({ title }: { title: string }) {
+function Features() {
+  const features = [
+    {
+      icon: "M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7",
+      title: "Pan-Kenya Network",
+      desc: "Access premium inventory across Nairobi, Mombasa, Kisumu, Nakuru, and Eldoret. Urban highways, malls, stadiums, and transit hubs.",
+    },
+    {
+      icon: "M13 10V3L4 14h7v7l9-11h-7z",
+      title: "Real-Time Campaign Control",
+      desc: "Go live in minutes. Update creatives, adjust scheduling, and pause campaigns instantly — all from one dashboard.",
+    },
+    {
+      icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
+      title: "Impression Analytics",
+      desc: "Track reach, frequency, and engagement with verified impression data. Generate client-ready reports in one click.",
+    },
+    {
+      icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+      title: "Programmatic Scheduling",
+      desc: "Set dayparting rules, audience triggers, and automated rotations. Your campaign works while you sleep.",
+    },
+    {
+      icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z",
+      title: "Multi-Client Management",
+      desc: "Built for agencies. Manage dozens of client accounts, brands, and budgets under one login with role-based access.",
+    },
+    {
+      icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
+      title: "99.2% Uptime SLA",
+      desc: "Enterprise-grade infrastructure with remote monitoring, automatic failover, and 24/7 NOC support across all screens.",
+    },
+  ]
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      minHeight: 400, gap: 16, textAlign: "center" }}>
-      <div style={{ width: 64, height: 64, borderRadius: "var(--radius-lg)",
-        background: "var(--bg-elevated)", border: "1px solid var(--border-default)",
-        display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(240,240,240,0.28)" strokeWidth="1.5">
-          <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
-        </svg>
+    <section style={{ padding: "100px var(--space-8)", maxWidth: "var(--max-width)", margin: "0 auto" }}>
+      <div style={{ textAlign: "center", marginBottom: 64 }}>
+        <p className="t-label-accent" style={{ marginBottom: 12 }}>Platform Features</p>
+        <h2 style={{
+          fontFamily: "var(--font-display)", fontSize: "clamp(32px, 4vw, 48px)",
+          fontWeight: 700, letterSpacing: "-0.03em", color: "var(--text-primary)", marginBottom: 16,
+        }}>Everything you need to dominate OOH</h2>
+        <p className="t-body" style={{ maxWidth: 480, margin: "0 auto" }}>
+          One platform to plan, launch, and measure every billboard campaign across Kenya.
+        </p>
       </div>
-      <div>
-        <p className="t-subheading" style={{ marginBottom: 6 }}>{title}</p>
-        <p className="t-body-sm">This section is under construction.</p>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "var(--border-subtle)", borderRadius: "var(--radius-xl)", overflow: "hidden" }}>
+        {features.map((f, i) => (
+          <div key={i} className="card" style={{
+            padding: 32, borderRadius: 0, border: "none",
+            transition: "background var(--transition-base)",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-elevated)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "var(--bg-surface)")}
+          >
+            <div style={{
+              width: 40, height: 40, borderRadius: "var(--radius-md)",
+              background: "var(--accent-dim)", border: "1px solid rgba(200,255,0,0.15)",
+              display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20,
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="var(--accent)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <path d={f.icon}/>
+              </svg>
+            </div>
+            <h3 style={{
+              fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600,
+              letterSpacing: "-0.01em", color: "var(--text-primary)", marginBottom: 10,
+            }}>{f.title}</h3>
+            <p className="t-body-sm">{f.desc}</p>
+          </div>
+        ))}
       </div>
-      <button className="btn btn-primary btn-sm">Coming soon</button>
-    </div>
+    </section>
+  )
+}
+
+// ─── Network Map ──────────────────────────────────────────────
+
+function Network() {
+  const cities = [
+    { name: "Nairobi",  screens: 724, status: "live" },
+    { name: "Mombasa",  screens: 198, status: "live" },
+    { name: "Kisumu",   screens: 112, status: "live" },
+    { name: "Nakuru",   screens: 89,  status: "live" },
+    { name: "Eldoret",  screens: 76,  status: "live" },
+    { name: "Thika",    screens: 45,  status: "live" },
+    { name: "Nyeri",    screens: 24,  status: "live" },
+    { name: "Malindi",  screens: 16,  status: "coming" },
+  ]
+
+  return (
+    <section style={{ padding: "100px var(--space-8)", background: "var(--bg-surface)" }}>
+      <div style={{ maxWidth: "var(--max-width)", margin: "0 auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
+
+          {/* Left */}
+          <div>
+            <p className="t-label-accent" style={{ marginBottom: 12 }}>Our Network</p>
+            <h2 style={{
+              fontFamily: "var(--font-display)", fontSize: "clamp(32px, 4vw, 48px)",
+              fontWeight: 700, letterSpacing: "-0.03em", color: "var(--text-primary)", marginBottom: 20,
+            }}>Screens everywhere<br />your audience is</h2>
+            <p className="t-body" style={{ marginBottom: 40 }}>
+              From Nairobi&apos;s busiest intersections to coastal tourism hubs — our network reaches Kenyans where they live, work, and commute.
+            </p>
+            <div style={{ display: "flex", gap: 40, marginBottom: 40 }}>
+              {[{ v: "1,284", l: "Total Screens" }, { v: "8", l: "Major Cities" }, { v: "47+", l: "Locations" }].map((s, i) => (
+                <div key={i}>
+                  <p style={{ fontFamily: "var(--font-display)", fontSize: 32, fontWeight: 700, letterSpacing: "-0.03em", color: "var(--text-primary)" }}>{s.v}</p>
+                  <p style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>{s.l}</p>
+                </div>
+              ))}
+            </div>
+            <button className="btn btn-primary">Explore Full Network →</button>
+          </div>
+
+          {/* Right — city list */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 1, background: "var(--border-subtle)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>
+            {cities.map((c, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "16px 24px", background: "var(--bg-surface)",
+                transition: "background var(--transition-fast)",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-elevated)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "var(--bg-surface)")}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{
+                    width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
+                    background: c.status === "live" ? "var(--status-live)" : "var(--text-muted)",
+                    boxShadow: c.status === "live" ? "0 0 6px var(--status-live)" : "none",
+                  }} />
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 500, color: "var(--text-primary)" }}>{c.name}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text-muted)" }}>
+                    {c.status === "live" ? `${c.screens} screens` : "Coming soon"}
+                  </span>
+                  {c.status === "live"
+                    ? <span className="badge badge-live">Live</span>
+                    : <span className="badge badge-draft">Soon</span>
+                  }
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── How It Works ─────────────────────────────────────────────
+
+function HowItWorks() {
+  const steps = [
+    { num: "01", title: "Choose Your Screens", desc: "Browse our interactive map. Filter by city, location type, footfall, and demographics to find the perfect inventory." },
+    { num: "02", title: "Upload Your Creative", desc: "Upload your artwork or use our built-in editor. We support all standard digital billboard formats and aspect ratios." },
+    { num: "03", title: "Set Schedule & Budget", desc: "Define your dayparting, campaign duration, and total spend. Our system calculates estimated impressions in real time." },
+    { num: "04", title: "Go Live & Measure", desc: "Launch with one click. Track impressions, reach, and engagement live — then download a full report for your client." },
+  ]
+
+  return (
+    <section style={{ padding: "100px var(--space-8)", maxWidth: "var(--max-width)", margin: "0 auto" }}>
+      <div style={{ textAlign: "center", marginBottom: 64 }}>
+        <p className="t-label-accent" style={{ marginBottom: 12 }}>How It Works</p>
+        <h2 style={{
+          fontFamily: "var(--font-display)", fontSize: "clamp(32px, 4vw, 48px)",
+          fontWeight: 700, letterSpacing: "-0.03em", color: "var(--text-primary)",
+        }}>From brief to billboard<br />in under 10 minutes</h2>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
+        {steps.map((s, i) => (
+          <div key={i} style={{ position: "relative" }}>
+            {i < steps.length - 1 && (
+              <div style={{
+                position: "absolute", top: 20, left: "calc(100% - 12px)",
+                width: "calc(100% - 24px)", height: 1,
+                background: "linear-gradient(to right, var(--border-default), transparent)",
+                zIndex: 0,
+              }} />
+            )}
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: "var(--radius-md)",
+                background: "var(--bg-elevated)", border: "1px solid var(--border-default)",
+                display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20,
+                fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, color: "var(--accent)",
+              }}>{s.num}</div>
+              <h3 style={{
+                fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600,
+                letterSpacing: "-0.01em", color: "var(--text-primary)", marginBottom: 10,
+              }}>{s.title}</h3>
+              <p className="t-body-sm">{s.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+// ─── Social Proof ─────────────────────────────────────────────
+
+function SocialProof() {
+  const clients = ["Safaricom", "KCB Group", "Equity Bank", "Airtel Kenya", "EABL", "Nation Media", "Bamburi", "Co-op Bank"]
+
+  return (
+    <section style={{ padding: "80px var(--space-8)", borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)" }}>
+      <div style={{ maxWidth: "var(--max-width)", margin: "0 auto", textAlign: "center" }}>
+        <p className="t-label" style={{ marginBottom: 40 }}>Trusted by Kenya&apos;s leading brands</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
+          {clients.map((c, i) => (
+            <div key={i} style={{
+              padding: "10px 24px",
+              border: "1px solid var(--border-subtle)",
+              borderRadius: "var(--radius-pill)",
+              fontFamily: "var(--font-display)", fontSize: 13, fontWeight: 600,
+              color: "var(--text-muted)",
+              transition: "all var(--transition-fast)",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = "var(--text-primary)"; e.currentTarget.style.borderColor = "var(--border-default)" }}
+            onMouseLeave={e => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.borderColor = "var(--border-subtle)" }}
+            >{c}</div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── CTA ──────────────────────────────────────────────────────
+
+function CTA() {
+  return (
+    <section style={{ padding: "120px var(--space-8)" }}>
+      <div style={{
+        maxWidth: 800, margin: "0 auto", textAlign: "center",
+        padding: "80px 60px",
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border-subtle)",
+        borderRadius: "var(--radius-xl)",
+        position: "relative", overflow: "hidden",
+      }}>
+        <div style={{
+          position: "absolute", top: "-40%", left: "50%", transform: "translateX(-50%)",
+          width: 400, height: 400, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(200,255,0,0.08) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        <p className="t-label-accent" style={{ marginBottom: 16 }}>Ready to go live?</p>
+        <h2 style={{
+          fontFamily: "var(--font-display)", fontSize: "clamp(32px, 4vw, 52px)",
+          fontWeight: 700, letterSpacing: "-0.03em", color: "var(--text-primary)", marginBottom: 20,
+        }}>Put your brand on<br />every screen in Kenya</h2>
+        <p className="t-body" style={{ maxWidth: 420, margin: "0 auto 40px" }}>
+          Join 200+ brands already running campaigns on Kenya&apos;s most connected digital OOH network.
+        </p>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <button className="btn btn-primary btn-lg">Start Your Campaign →</button>
+          <button className="btn btn-secondary btn-lg">Talk to Sales</button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── Footer ───────────────────────────────────────────────────
+
+function Footer() {
+  return (
+    <footer style={{ borderTop: "1px solid var(--border-subtle)", padding: "48px var(--space-8)" }}>
+      <div style={{ maxWidth: "var(--max-width)", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 24, height: 24, borderRadius: 5, background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="1" width="6" height="4" rx="1" fill="#080808"/>
+              <rect x="9" y="1" width="6" height="4" rx="1" fill="#080808"/>
+              <rect x="1" y="7" width="6" height="4" rx="1" fill="#080808"/>
+              <rect x="9" y="7" width="6" height="4" rx="1" fill="#080808"/>
+              <rect x="1" y="13" width="14" height="2" rx="1" fill="#080808"/>
+            </svg>
+          </div>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, letterSpacing: "-0.02em" }}>
+            DOOH<span style={{ color: "var(--accent)" }}>.</span>
+          </span>
+        </div>
+        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>© 2025 DOOH Platform. Nairobi, Kenya.</p>
+        <div style={{ display: "flex", gap: 24 }}>
+          {["Privacy", "Terms", "Contact"].map(l => (
+            <a key={l} href="#" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none",
+              transition: "color var(--transition-fast)" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "var(--text-primary)")}
+              onMouseLeave={e => (e.currentTarget.style.color = "var(--text-muted)")}
+            >{l}</a>
+          ))}
+        </div>
+      </div>
+    </footer>
   )
 }
 
 // ─── Root Page ────────────────────────────────────────────────
 
 export default function Home() {
-  const [activeSection, setActiveSection] = useState("Dashboard")
-
-  const views: Record<string, JSX.Element> = {
-    Dashboard: <Dashboard />,
-    Campaigns: <Placeholder title="Campaigns" />,
-    Screens:   <Placeholder title="Screens" />,
-    Analytics: <Placeholder title="Analytics" />,
-    Creatives: <Placeholder title="Creatives" />,
-  }
-
   return (
     <>
-      <Nav activeSection={activeSection} setActiveSection={setActiveSection} />
-
-      {/* Ticker below nav */}
+      <Nav />
       <div style={{ paddingTop: "var(--nav-height)" }}>
         <Ticker />
       </div>
-
-      {/* Main layout */}
-      <div style={{ display: "flex" }}>
-
-        {/* Sidebar */}
-        <aside className="sidebar">
-          <div style={{ padding: "0 0 16px", borderBottom: "1px solid var(--border-subtle)", marginBottom: 8 }}>
-            <div style={{ padding: "0 24px" }}>
-              <p className="t-label" style={{ marginBottom: 8 }}>Platform</p>
-            </div>
-          </div>
-          {[
-            { label: "Dashboard",  icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-            { label: "Campaigns",  icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
-            { label: "Screens",    icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
-            { label: "Analytics",  icon: "M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" },
-            { label: "Creatives",  icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" },
-          ].map(item => (
-            <button key={item.label}
-              onClick={() => setActiveSection(item.label)}
-              className={`sidebar-item ${activeSection === item.label ? "active" : ""}`}
-              style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                <path d={item.icon}/>
-              </svg>
-              {item.label}
-            </button>
-          ))}
-
-          <div style={{ padding: "16px 0", borderTop: "1px solid var(--border-subtle)", marginTop: 16 }}>
-            <div style={{ padding: "0 24px", marginBottom: 8 }}>
-              <p className="t-label">Management</p>
-            </div>
-            {[
-              { label: "Clients",   icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
-              { label: "Settings",  icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" },
-            ].map(item => (
-              <button key={item.label}
-                onClick={() => setActiveSection(item.label)}
-                className="sidebar-item"
-                style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                  <path d={item.icon}/>
-                </svg>
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Network status widget */}
-          <div style={{ margin: "12px 16px", padding: 14, borderRadius: "var(--radius-md)",
-            background: "var(--accent-glow)", border: "1px solid rgba(200,255,0,0.12)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)",
-                boxShadow: "0 0 6px var(--accent)", display: "inline-block" }} />
-              <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em",
-                textTransform: "uppercase", color: "var(--accent)" }}>Network Live</span>
-            </div>
-            <p style={{ fontSize: 20, fontFamily: "var(--font-display)", fontWeight: 700,
-              letterSpacing: "-0.03em", color: "var(--text-primary)" }}>1,271</p>
-            <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>screens broadcasting</p>
-          </div>
-        </aside>
-
-        {/* Main */}
-        <main className="main-content" style={{ marginLeft: "var(--sidebar-width)" }}>
-          {views[activeSection] ?? <Placeholder title={activeSection} />}
-        </main>
-      </div>
+      <Hero />
+      <SocialProof />
+      <Features />
+      <NetworkShowcase />
+      <Network />
+      <HowItWorks />
+      <CTA />
+      <Footer />
     </>
   )
 }
