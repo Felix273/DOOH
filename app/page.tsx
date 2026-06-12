@@ -97,7 +97,7 @@ const SHOWCASE_SCREENS = [
 
 function NetworkShowcase() {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div className="container" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {/* Section header */}
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
         <div>
