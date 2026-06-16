@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import Image from "next/image"
+import Link from "next/link"
 // ─── Ticker ──────────────────────────────────────────────────
 
 const TICKER_ITEMS = [
@@ -10,6 +11,14 @@ const TICKER_ITEMS = [
   "2.4M impressions today",
   "99.2% network uptime",
   "Nairobi · Mombasa · Kisumu · Eldoret",
+]
+
+const NAV_LINKS = [
+  { label: "Product", href: "/product" },
+  { label: "Network", href: "/network" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Case Studies", href: "/case-studies" },
+  { label: "About", href: "/about" },
 ]
 
 function Ticker() {
@@ -99,22 +108,18 @@ function NetworkShowcase() {
   return (
     <div className="container" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {/* Section header */}
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+      <div className="section-heading-row">
         <div>
           <p className="t-label" style={{ marginBottom: 6 }}>Live Network</p>
           <h2 className="t-heading">Screen Showcase</h2>
         </div>
-        <button className="btn btn-ghost btn-sm" style={{ color: "var(--accent)" }}>
+        <Link href="/screens" className="btn btn-ghost btn-sm" style={{ color: "var(--accent)" }}>
           View all screens →
-        </button>
+        </Link>
       </div>
 
       {/* Photo grid */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: 16,
-      }}>
+      <div className="showcase-grid">
         {SHOWCASE_SCREENS.map((screen) => (
           <div
             key={screen.id}
@@ -228,9 +233,9 @@ function Nav() {
         </div>
 
         {/* Links */}
-        <div style={{ display: "flex", gap: 2, margin: "0 auto" }}>
-          {["Product", "Network", "Pricing", "Case Studies", "About"].map(link => (
-            <a key={link} href="#" style={{
+        <div className="marketing-nav-links">
+          {NAV_LINKS.map((link) => (
+            <Link key={link.href} href={link.href} style={{
               padding: "6px 14px",
               fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 500,
               color: "var(--text-secondary)",
@@ -240,15 +245,28 @@ function Nav() {
             }}
             onMouseEnter={e => (e.currentTarget.style.color = "var(--text-primary)")}
             onMouseLeave={e => (e.currentTarget.style.color = "var(--text-secondary)")}
-            >{link}</a>
+            >{link.label}</Link>
           ))}
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", gap: 8 }}>
-          <button className="btn btn-secondary btn-sm">Log in</button>
-          <button className="btn btn-primary btn-sm">Get Started →</button>
+        <div className="marketing-actions">
+          <Link href="/login" className="btn btn-secondary btn-sm">Log in</Link>
+          <Link href="/register" className="btn btn-primary btn-sm">Get Started →</Link>
         </div>
+
+        <Link
+          href="/menu"
+          className="mobile-nav-link"
+          aria-label="Open navigation menu"
+        >
+          Menu
+          <span aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+        </Link>
       </div>
     </nav>
   )
@@ -259,9 +277,12 @@ function Nav() {
 function Hero() {
   const [time, setTime] = useState<Date | null>(null)
   useEffect(() => {
-    setTime(new Date())
+    const timeout = window.setTimeout(() => setTime(new Date()), 0)
     const t = setInterval(() => setTime(new Date()), 1000)
-    return () => clearInterval(t)
+    return () => {
+      window.clearTimeout(timeout)
+      clearInterval(t)
+    }
   }, [])
 
   return (
@@ -320,14 +341,12 @@ function Hero() {
 
       {/* CTAs */}
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 80 }}>
-        <button className="btn btn-primary btn-lg">Start a Campaign →</button>
-        <button className="btn btn-secondary btn-lg">View Our Network</button>
+        <Link href="/register" className="btn btn-primary btn-lg">Start a Campaign →</Link>
+        <Link href="/screens" className="btn btn-secondary btn-lg">View Our Network</Link>
       </div>
 
       {/* Hero stats strip */}
-      <div style={{
-        display: "flex",
-        gap: 0,
+      <div className="hero-stats-grid" style={{
         border: "1px solid var(--border-subtle)",
         borderRadius: "var(--radius-xl)",
         overflow: "hidden",
@@ -405,7 +424,7 @@ function Features() {
         </p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "var(--border-subtle)", borderRadius: "var(--radius-xl)", overflow: "hidden" }}>
+      <div className="feature-grid">
         {features.map((f, i) => (
           <div key={i} className="card" style={{
             padding: 32, borderRadius: 0, border: "none",
@@ -453,7 +472,7 @@ function Network() {
   return (
     <section style={{ padding: "100px var(--space-8)", background: "var(--bg-surface)" }}>
       <div style={{ maxWidth: "var(--max-width)", margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
+        <div className="home-network-split">
 
           {/* Left */}
           <div>
@@ -465,7 +484,7 @@ function Network() {
             <p className="t-body" style={{ marginBottom: 40 }}>
               From Nairobi&apos;s busiest intersections to coastal tourism hubs — our network reaches Kenyans where they live, work, and commute.
             </p>
-            <div style={{ display: "flex", gap: 40, marginBottom: 40 }}>
+            <div className="home-stat-strip">
               {[{ v: "1,284", l: "Total Screens" }, { v: "8", l: "Major Cities" }, { v: "47+", l: "Locations" }].map((s, i) => (
                 <div key={i}>
                   <p style={{ fontFamily: "var(--font-display)", fontSize: 32, fontWeight: 700, letterSpacing: "-0.03em", color: "var(--text-primary)" }}>{s.v}</p>
@@ -473,7 +492,7 @@ function Network() {
                 </div>
               ))}
             </div>
-            <button className="btn btn-primary">Explore Full Network →</button>
+            <Link href="/screens" className="btn btn-primary">Explore Full Network →</Link>
           </div>
 
           {/* Right — city list */}
@@ -533,11 +552,11 @@ function HowItWorks() {
         }}>From brief to billboard<br />in under 10 minutes</h2>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
+      <div className="steps-grid">
         {steps.map((s, i) => (
           <div key={i} style={{ position: "relative" }}>
             {i < steps.length - 1 && (
-              <div style={{
+              <div className="step-connector" style={{
                 position: "absolute", top: 20, left: "calc(100% - 12px)",
                 width: "calc(100% - 24px)", height: 1,
                 background: "linear-gradient(to right, var(--border-default), transparent)",
@@ -621,8 +640,8 @@ function CTA() {
           Join 200+ brands already running campaigns on Kenya&apos;s most connected digital OOH network.
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <button className="btn btn-primary btn-lg">Start Your Campaign →</button>
-          <button className="btn btn-secondary btn-lg">Talk to Sales</button>
+          <Link href="/register" className="btn btn-primary btn-lg">Start Your Campaign →</Link>
+          <Link href="/screens" className="btn btn-secondary btn-lg">View Screens</Link>
         </div>
       </div>
     </section>
@@ -634,7 +653,7 @@ function CTA() {
 function Footer() {
   return (
     <footer style={{ borderTop: "1px solid var(--border-subtle)", padding: "48px var(--space-8)" }}>
-      <div style={{ maxWidth: "var(--max-width)", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="footer-inner">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 24, height: 24, borderRadius: 5, background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
@@ -652,11 +671,11 @@ function Footer() {
         <p style={{ fontSize: 12, color: "var(--text-muted)" }}>© 2025 DOOH Platform. Nairobi, Kenya.</p>
         <div style={{ display: "flex", gap: 24 }}>
           {["Privacy", "Terms", "Contact"].map(l => (
-            <a key={l} href="#" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none",
+            <Link key={l} href={l === "Privacy" ? "/privacy" : l === "Terms" ? "/terms" : "#"} style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none",
               transition: "color var(--transition-fast)" }}
               onMouseEnter={e => (e.currentTarget.style.color = "var(--text-primary)")}
               onMouseLeave={e => (e.currentTarget.style.color = "var(--text-muted)")}
-            >{l}</a>
+            >{l}</Link>
           ))}
         </div>
       </div>

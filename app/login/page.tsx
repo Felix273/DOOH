@@ -23,16 +23,22 @@ export default function LoginPage() {
       if (signInError) throw signInError
 
       // Fetch profile to get role
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", data.user.id)
         .single()
+      if (profileError || !profile) {
+        throw new Error("Your account profile was not found. Apply the Supabase migration or create a profiles row for this user.")
+      }
 
-      if (profile?.role === "media_owner") {
+      if (profile.role === "media_owner") {
         router.push("/owner")
-      } else if (profile?.role === "admin") {
+      } else if (profile.role === "admin") {
         router.push("/admin")
+      } else if (window.location.search) {
+        const next = new URLSearchParams(window.location.search).get("next")
+        router.push(next?.startsWith("/") ? next : "/dashboard")
       } else {
         router.push("/dashboard")
       }

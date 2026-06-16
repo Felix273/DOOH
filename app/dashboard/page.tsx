@@ -1,14 +1,29 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { formatCurrency } from "@/lib/utils"
 import type { Profile } from "@/types"
+
+type DashboardStats = {
+  activeCampaigns: number
+  screensBooked: number
+  totalSpend: number
+  impressions: number
+}
 
 export default function DashboardPage() {
   const router = useRouter()
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [stats, setStats] = useState<DashboardStats>({
+    activeCampaigns: 0,
+    screensBooked: 0,
+    totalSpend: 0,
+    impressions: 0,
+  })
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     async function load() {
@@ -21,11 +36,34 @@ export default function DashboardPage() {
         .eq("id", user.id)
         .single()
 
+      if (data?.role === "admin") {
+        router.push("/admin")
+        return
+      }
+
+      if (data?.role === "media_owner") {
+        router.push("/owner")
+        return
+      }
+
+      const { data: bookings } = await supabase
+        .from("bookings")
+        .select("screen_id, status, amount_total, payment_status")
+        .eq("advertiser_id", user.id)
+
       setProfile(data)
+      setStats({
+        activeCampaigns: bookings?.filter(booking => booking.status === "approved").length ?? 0,
+        screensBooked: new Set(bookings?.map(booking => booking.screen_id) ?? []).size,
+        totalSpend: bookings
+          ?.filter(booking => booking.payment_status === "paid")
+          .reduce((sum, booking) => sum + Number(booking.amount_total), 0) ?? 0,
+        impressions: 0,
+      })
       setLoading(false)
     }
     load()
-  }, [])
+  }, [router, supabase])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -39,11 +77,11 @@ export default function DashboardPage() {
   )
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-base)", padding: "var(--space-8)" }}>
+    <div className="app-page">
       <div style={{ maxWidth: "var(--max-width)", margin: "0 auto" }}>
 
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-10)" }}>
+        <div className="app-titlebar">
           <div>
             <p className="t-label-accent" style={{ marginBottom: 6 }}>Advertiser Dashboard</p>
             <h1 style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em", color: "var(--text-primary)" }}>
@@ -56,12 +94,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Placeholder stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: "var(--space-10)" }}>
+        <div className="responsive-grid responsive-grid-4" style={{ marginBottom: "var(--space-10)" }}>
           {[
-            { label: "Active Campaigns", value: "0" },
-            { label: "Screens Booked", value: "0" },
-            { label: "Total Spend", value: "KES 0" },
-            { label: "Impressions", value: "0" },
+            { label: "Active Campaigns", value: String(stats.activeCampaigns) },
+            { label: "Screens Booked", value: String(stats.screensBooked) },
+            { label: "Total Spend", value: formatCurrency(stats.totalSpend) },
+            { label: "Impressions", value: String(stats.impressions) },
           ].map(stat => (
             <div key={stat.label} className="stat-card">
               <p className="stat-card-label">{stat.label}</p>
@@ -92,13 +130,10 @@ export default function DashboardPage() {
               Browse available screens across Kenya and launch your first digital billboard campaign.
             </p>
           </div>
-          <button
-            onClick={() => router.push("/screens")}
-            className="btn btn-primary"
-            style={{ marginTop: 8 }}
-          >
-            Browse Screens →
-          </button>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
+            <Link href="/screens" className="btn btn-primary">Browse Screens →</Link>
+            <Link href="/bookings" className="btn btn-secondary">View Bookings</Link>
+          </div>
         </div>
       </div>
     </div>

@@ -80,7 +80,7 @@ export interface Payment {
   advertiser_id: string
   amount: number
   currency: string
-  method: 'mpesa' | 'card'
+  method: 'mpesa' | 'card' | 'bank_transfer'
   provider_reference: string | null
   status: 'pending' | 'completed' | 'failed'
   created_at: string

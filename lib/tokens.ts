@@ -35,7 +35,7 @@ export const colors = {
 
 export const fonts = {
   display: "'Space Grotesk', 'Helvetica Neue', Arial, sans-serif",
-  body:    "'Inter', 'Helvetica Neue', Arial, sans-serif",
+  body:    "'Space Grotesk', 'Helvetica Neue', Arial, sans-serif",
   mono:    "'Space Mono', 'Courier New', monospace",
 } as const
 
