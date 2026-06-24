@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { NoopRealtimeTransport } from './noop-realtime'
 
 export async function createClient() {
   const cookieStore = await cookies()
@@ -8,6 +9,9 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      realtime: {
+        transport: NoopRealtimeTransport,
+      },
       cookies: {
         getAll() {
           return cookieStore.getAll()

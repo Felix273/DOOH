@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient } from "@/lib/supabase/admin"
+import { createAdminClient, createUserScopedClient } from "@/lib/supabase/admin"
 
 type PaymentMethod = "mpesa" | "card" | "bank_transfer"
 
@@ -9,8 +9,9 @@ async function getUser(request: NextRequest) {
     return { error: NextResponse.json({ error: "Missing session" }, { status: 401 }) }
   }
 
-  const supabase = createAdminClient()
-  const { data, error } = await supabase.auth.getUser(token)
+  const adminSupabase = createAdminClient()
+  const supabase = createUserScopedClient(token)
+  const { data, error } = await adminSupabase.auth.getUser(token)
 
   if (error || !data.user) {
     return { error: NextResponse.json({ error: "Invalid session" }, { status: 401 }) }

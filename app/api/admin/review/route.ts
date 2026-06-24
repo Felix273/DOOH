@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient } from "@/lib/supabase/admin"
+import { createAdminClient, createUserScopedClient } from "@/lib/supabase/admin"
 
 async function requireAdmin(request: NextRequest) {
   const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "")
@@ -7,8 +7,9 @@ async function requireAdmin(request: NextRequest) {
     return { error: NextResponse.json({ error: "Missing session" }, { status: 401 }) }
   }
 
-  const supabase = createAdminClient()
-  const { data: userData, error: userError } = await supabase.auth.getUser(token)
+  const adminSupabase = createAdminClient()
+  const supabase = createUserScopedClient(token)
+  const { data: userData, error: userError } = await adminSupabase.auth.getUser(token)
   const user = userData.user
 
   if (userError || !user) {
