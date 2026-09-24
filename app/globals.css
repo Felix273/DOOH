@@ -403,6 +403,12 @@ body {
   border-color: var(--border-subtle);
 }
 
+.badge-info {
+  color: var(--text-secondary);
+  background: rgba(240, 240, 240, 0.08);
+  border-color: var(--border-default);
+}
+
 .badge-accent {
   color: var(--accent);
   background: var(--accent-dim);

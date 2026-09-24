@@ -1,6 +1,6 @@
 "use client"
 export const dynamic = 'force-dynamic'
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import type { Screen, Profile } from "@/types"
@@ -10,11 +10,20 @@ type Tab = "pending" | "active" | "suspended"
 
 export default function AdminDashboardPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [screens, setScreens] = useState<ScreenWithOwner[]>([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<Tab>("pending")
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+
+  const fetchScreens = useCallback(async () => {
+    const { data } = await supabase
+      .from("screens")
+      .select("*, profiles(*)")
+      .order("created_at", { ascending: false })
+    setScreens((data ?? []) as ScreenWithOwner[])
+    setLoading(false)
+  }, [supabase])
 
   useEffect(() => {
     async function load() {
@@ -22,17 +31,8 @@ export default function AdminDashboardPage() {
       if (!user) { router.push("/login"); return }
       await fetchScreens()
     }
-    load()
-  }, [])
-
-  async function fetchScreens() {
-    const { data } = await supabase
-      .from("screens")
-      .select("*, profiles(*)")
-      .order("created_at", { ascending: false })
-    setScreens((data ?? []) as ScreenWithOwner[])
-    setLoading(false)
-  }
+    void load()
+  }, [fetchScreens, router, supabase])
 
   async function updateScreenStatus(screenId: string, status: "active" | "suspended" | "pending") {
     setActionLoading(screenId)

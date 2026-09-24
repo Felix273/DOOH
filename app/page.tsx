@@ -94,14 +94,6 @@ const SHOWCASE_SCREENS = [
     status: "live" as CampaignStatus,
     img: "https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?w=800&q=80",
   },
-  {
-    id: 6,
-    name: "Karen Hub Billboard",
-    location: "Karen",
-    type: "Billboard",
-    status: "draft" as CampaignStatus,
-    img: "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=800&q=80",
-  },
 ]
 
 function NetworkShowcase() {
@@ -308,7 +300,7 @@ function Hero() {
       {/* Live badge */}
       <div style={{ marginBottom: 32 }}>
         <span className="badge badge-live">
-          Live Network — {time ? time.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" }) : "—"} EAT
+          Live Network — {time ? time.toLocaleTimeString("en-KE", { timeZone: "Africa/Nairobi", hour: "2-digit", minute: "2-digit" }) : "—"} EAT
         </span>
       </div>
 
