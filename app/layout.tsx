@@ -15,8 +15,26 @@ const spaceMono = Space_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "DOOH Platform — Book Digital Billboard Advertising in Kenya",
-  description: "Discover, book and manage digital out-of-home advertising campaigns across Kenya.",
+  metadataBase: new URL("https://dooh-bice.vercel.app"),
+  title: {
+    default: "DOOH Platform — Book Digital Billboard Advertising in Kenya",
+    template: "%s | DOOH Platform",
+  },
+  description: "Discover, compare, and request bookings for digital out-of-home advertising screens across Kenya.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "DOOH Platform",
+    title: "Book digital billboard advertising across Kenya",
+    description: "Discover, compare, and request bookings for verified digital OOH inventory across Kenya.",
+    url: "/",
+  },
+  twitter: {
+    card: "summary",
+    title: "DOOH Platform — Digital OOH advertising in Kenya",
+    description: "Discover and request bookings for digital screens across Kenya.",
+  },
+  robots: { index: true, follow: true },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
