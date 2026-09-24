@@ -1296,6 +1296,177 @@ body {
   box-shadow: inset 0 0 0 1px var(--status-live);
 }
 
+.screen-detail-layout {
+  align-items: start;
+}
+
+.map-preview {
+  position: relative;
+  min-height: 220px;
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: #17201c;
+}
+
+.map-grid {
+  position: absolute;
+  inset: -20%;
+  opacity: 0.55;
+  transform: rotate(-8deg);
+  background-image:
+    linear-gradient(24deg, transparent 46%, rgba(200, 255, 0, 0.16) 47%, transparent 49%),
+    linear-gradient(112deg, transparent 43%, rgba(240, 240, 240, 0.12) 44%, transparent 46%),
+    linear-gradient(165deg, transparent 55%, rgba(240, 240, 240, 0.1) 56%, transparent 58%);
+  background-size: 120px 90px, 160px 140px, 200px 180px;
+}
+
+.map-pin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 8px solid rgba(200, 255, 0, 0.18);
+  border-radius: 50%;
+  color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(200, 255, 0, 0.5), 0 0 36px rgba(200, 255, 0, 0.35);
+  transform: translate(-50%, -50%);
+}
+
+.map-pin::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #17201c;
+}
+
+.map-label {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  color: var(--text-primary);
+  background: rgba(8, 8, 8, 0.72);
+  font-size: 12px;
+}
+
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.audience-value {
+  margin: 4px 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.availability-calendar {
+  padding: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+}
+
+.calendar-weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.calendar-weekdays {
+  margin-bottom: 6px;
+}
+
+.calendar-weekdays span {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.calendar-day {
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+
+.calendar-day:hover:not(:disabled),
+.calendar-day:focus-visible {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.calendar-day.is-selected {
+  color: var(--text-inverse);
+  background: var(--accent-dim);
+}
+
+.calendar-day.is-endpoint {
+  color: var(--text-inverse);
+  background: var(--accent);
+  font-weight: 700;
+}
+
+.calendar-day.is-unavailable {
+  color: var(--status-error);
+  background: rgba(255, 68, 68, 0.08);
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.calendar-day.is-outside,
+.calendar-day:disabled:not(.is-unavailable) {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 14px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.calendar-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.calendar-legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.calendar-legend-dot.is-available { background: var(--text-secondary); }
+.calendar-legend-dot.is-unavailable { background: var(--status-error); }
+.calendar-legend-dot.is-selected { background: var(--accent); }
+
 /* ============================================
    TICKER / MARQUEE
    ============================================ */
@@ -1435,6 +1606,10 @@ body {
 
 /* Final responsive pass for classes declared after the first breakpoint block. */
 @media (max-width: 900px) {
+  .screen-detail-layout {
+    grid-template-columns: 1fr !important;
+  }
+
   .responsive-grid-2,
   .responsive-grid-3,
   .responsive-grid-4,
@@ -1468,6 +1643,14 @@ body {
 }
 
 @media (max-width: 640px) {
+  .audience-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-day {
+    min-height: 32px;
+  }
+
   .nav-inner {
     padding: 0 var(--space-4);
     gap: var(--space-3);

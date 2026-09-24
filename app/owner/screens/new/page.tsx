@@ -35,6 +35,9 @@ export default function NewOwnerScreenPage() {
     price_per_day: "",
     price_per_week: "",
     price_per_month: "",
+    daily_footfall: "",
+    daily_impressions: "",
+    audience_source: "",
     image_url: "",
   })
   const [message, setMessage] = useState("")
@@ -72,6 +75,10 @@ export default function NewOwnerScreenPage() {
         price_per_day: Number(form.price_per_day),
         price_per_week: form.price_per_week ? Number(form.price_per_week) : null,
         price_per_month: form.price_per_month ? Number(form.price_per_month) : null,
+        daily_footfall: form.daily_footfall ? Number(form.daily_footfall) : null,
+        daily_impressions: form.daily_impressions ? Number(form.daily_impressions) : null,
+        audience_source: form.audience_source || null,
+        audience_updated_at: form.daily_footfall || form.daily_impressions ? new Date().toISOString().slice(0, 10) : null,
       })
       .select("id")
       .single()
@@ -184,6 +191,25 @@ export default function NewOwnerScreenPage() {
           <div>
             <label className="t-label" style={{ display: "block", marginBottom: 6 }}>Price per month</label>
             <input className="input" type="number" min="0" value={form.price_per_month} onChange={event => setForm({ ...form, price_per_month: event.target.value })} />
+          </div>
+        </div>
+
+        <div>
+          <p className="t-label-accent" style={{ marginBottom: 6 }}>Audience planning data</p>
+          <p className="t-body-sm" style={{ marginBottom: 12 }}>Optional estimates shown to advertisers. Add a source and keep the figures current.</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            <div>
+              <label className="t-label" style={{ display: "block", marginBottom: 6 }}>Daily footfall</label>
+              <input className="input" type="number" min="0" value={form.daily_footfall} onChange={event => setForm({ ...form, daily_footfall: event.target.value })} placeholder="e.g. 45000" />
+            </div>
+            <div>
+              <label className="t-label" style={{ display: "block", marginBottom: 6 }}>Daily impressions</label>
+              <input className="input" type="number" min="0" value={form.daily_impressions} onChange={event => setForm({ ...form, daily_impressions: event.target.value })} placeholder="e.g. 120000" />
+            </div>
+            <div>
+              <label className="t-label" style={{ display: "block", marginBottom: 6 }}>Source / methodology</label>
+              <input className="input" value={form.audience_source} onChange={event => setForm({ ...form, audience_source: event.target.value })} placeholder="Traffic study, operator estimate..." />
+            </div>
           </div>
         </div>
 

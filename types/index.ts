@@ -38,6 +38,10 @@ export interface Screen {
   price_per_day: number
   price_per_week: number | null
   price_per_month: number | null
+  daily_footfall: number | null
+  daily_impressions: number | null
+  audience_source: string | null
+  audience_updated_at: string | null
   is_featured: boolean
   created_at: string
   screen_images?: ScreenImage[]
