@@ -221,7 +221,7 @@ export default function AdvertiserBookingsPage() {
                       }
                     </td>
                     <td>
-                      {booking.status === "pending" ? (
+                      {(booking.status === "pending" || (booking.status === "approved" && booking.start_date >= new Date().toISOString().slice(0, 10))) ? (
                         <button className="btn btn-secondary btn-sm" onClick={() => cancelBooking(booking.id)}>Cancel</button>
                       ) : null}
                     </td>
