@@ -77,7 +77,7 @@ export default function OwnerBookingsPage() {
     return () => window.clearTimeout(timeout)
   }, [loadBookings])
 
-  const updateStatus = async (id: string, status: "approved" | "rejected") => {
+  const updateStatus = async (id: string, status: "approved" | "rejected" | "completed") => {
     setMessage("")
     const { error } = await supabase
       .from("bookings")
@@ -155,6 +155,8 @@ export default function OwnerBookingsPage() {
                           <button className="btn btn-primary btn-sm" onClick={() => updateStatus(booking.id, "approved")}>Approve</button>
                           <button className="btn btn-secondary btn-sm" onClick={() => updateStatus(booking.id, "rejected")}>Reject</button>
                         </div>
+                      ) : booking.status === "approved" && booking.end_date <= new Date().toISOString().slice(0, 10) ? (
+                        <button className="btn btn-secondary btn-sm" onClick={() => updateStatus(booking.id, "completed")}>Mark complete</button>
                       ) : null}
                     </td>
                   </tr>
