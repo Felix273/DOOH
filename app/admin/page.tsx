@@ -6,13 +6,27 @@ import { createClient } from "@/lib/supabase/client"
 import type { Screen, Profile } from "@/types"
 
 type ScreenWithOwner = Screen & { profiles: Profile | null }
+type PaymentReview = {
+  id: string
+  amount: number
+  method: string
+  provider_reference: string
+  status: "pending" | "completed" | "failed"
+  created_at: string
+  bookings: { reference: string; screens: { name: string; city: string } | null } | null
+  profiles: { company_name: string | null; full_name: string | null } | null
+}
 type Tab = "pending" | "active" | "suspended"
 
 export default function AdminDashboardPage() {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
   const [screens, setScreens] = useState<ScreenWithOwner[]>([])
+  const [payments, setPayments] = useState<PaymentReview[]>([])
   const [loading, setLoading] = useState(true)
+  const [paymentsLoading, setPaymentsLoading] = useState(true)
+  const [paymentActionLoading, setPaymentActionLoading] = useState<string | null>(null)
+  const [paymentMessage, setPaymentMessage] = useState("")
   const [tab, setTab] = useState<Tab>("pending")
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
@@ -25,14 +39,78 @@ export default function AdminDashboardPage() {
     setLoading(false)
   }, [supabase])
 
+  const fetchPayments = useCallback(async () => {
+    setPaymentsLoading(true)
+    const { data: sessionData } = await supabase.auth.getSession()
+    const token = sessionData.session?.access_token
+
+    if (!token) {
+      setPaymentsLoading(false)
+      return
+    }
+
+    const response = await fetch("/api/admin/review", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const payload = await response.json()
+
+    if (response.ok) {
+      setPayments((payload.payments ?? []) as PaymentReview[])
+    } else {
+      setPaymentMessage(payload.error ?? "Could not load payment reviews.")
+    }
+
+    setPaymentsLoading(false)
+  }, [supabase])
+
+  const reviewPayment = async (paymentId: string, status: "completed" | "failed") => {
+    setPaymentActionLoading(paymentId)
+    setPaymentMessage("")
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData.session?.access_token
+
+      if (!token) {
+        setPaymentMessage("Your session has expired. Please sign in again.")
+        return
+      }
+
+      const response = await fetch("/api/payments", {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ paymentId, status }),
+      })
+      const payload = await response.json()
+
+      if (!response.ok) {
+        setPaymentMessage(payload.error ?? "Could not update the payment.")
+        return
+      }
+
+      setPaymentMessage(status === "completed"
+        ? "Payment verified and booking marked paid."
+        : "Payment marked as failed.")
+      await fetchPayments()
+    } catch {
+      setPaymentMessage("Could not update the payment. Please try again.")
+    } finally {
+      setPaymentActionLoading(null)
+    }
+  }
+
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push("/login"); return }
       await fetchScreens()
+      await fetchPayments()
     }
     void load()
-  }, [fetchScreens, router, supabase])
+  }, [fetchPayments, fetchScreens, router, supabase])
 
   async function updateScreenStatus(screenId: string, status: "active" | "suspended" | "pending") {
     setActionLoading(screenId)
@@ -100,6 +178,93 @@ export default function AdminDashboardPage() {
             </button>
           ))}
         </div>
+        <section style={{ marginBottom: "var(--space-10)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <div>
+              <p className="t-label-accent" style={{ marginBottom: 6 }}>Payment verification</p>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: "var(--text-primary)" }}>
+                Pending payments ({payments.length})
+              </h2>
+            </div>
+            {paymentMessage && (
+              <p role="status" style={{ color: "var(--text-secondary)", fontSize: 13, maxWidth: 420, textAlign: "right" }}>
+                {paymentMessage}
+              </p>
+            )}
+          </div>
+
+          {paymentsLoading ? (
+            <div className="card" style={{ padding: "var(--space-6)" }}>
+              <p style={{ color: "var(--text-muted)", fontSize: 14 }}>Loading payment reviews...</p>
+            </div>
+          ) : payments.length === 0 ? (
+            <div className="card" style={{ padding: "var(--space-6)" }}>
+              <p style={{ color: "var(--text-muted)", fontSize: 14 }}>No payments are waiting for verification.</p>
+            </div>
+          ) : (
+            <div className="card" style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ color: "var(--text-muted)", textAlign: "left" }}>
+                    <th style={{ padding: "14px 16px" }}>Advertiser</th>
+                    <th style={{ padding: "14px 16px" }}>Booking</th>
+                    <th style={{ padding: "14px 16px" }}>Amount</th>
+                    <th style={{ padding: "14px 16px" }}>Method / reference</th>
+                    <th style={{ padding: "14px 16px" }}>Submitted</th>
+                    <th style={{ padding: "14px 16px" }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payments.map(payment => (
+                    <tr key={payment.id} style={{ borderTop: "1px solid var(--border-subtle)" }}>
+                      <td style={{ padding: "14px 16px", color: "var(--text-primary)" }}>
+                        {payment.profiles?.company_name || payment.profiles?.full_name || "Unknown advertiser"}
+                      </td>
+                      <td style={{ padding: "14px 16px", color: "var(--text-secondary)" }}>
+                        <div>{payment.bookings?.reference || "—"}</div>
+                        <small style={{ color: "var(--text-muted)" }}>
+                          {payment.bookings?.screens
+                            ? `${payment.bookings.screens.name} · ${payment.bookings.screens.city}`
+                            : "Screen unavailable"}
+                        </small>
+                      </td>
+                      <td style={{ padding: "14px 16px", color: "var(--text-primary)", whiteSpace: "nowrap" }}>
+                        KES {Number(payment.amount).toLocaleString("en-KE")}
+                      </td>
+                      <td style={{ padding: "14px 16px", color: "var(--text-secondary)" }}>
+                        <div style={{ textTransform: "capitalize" }}>{payment.method.replace("_", " ")}</div>
+                        <code style={{ color: "var(--accent)", wordBreak: "break-all" }}>{payment.provider_reference}</code>
+                      </td>
+                      <td style={{ padding: "14px 16px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                        {new Date(payment.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
+                      </td>
+                      <td style={{ padding: "14px 16px" }}>
+                        <div style={{ display: "flex", gap: 8, whiteSpace: "nowrap" }}>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            disabled={paymentActionLoading === payment.id}
+                            onClick={() => reviewPayment(payment.id, "completed")}
+                          >
+                            {paymentActionLoading === payment.id ? "..." : "Verify"}
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            disabled={paymentActionLoading === payment.id}
+                            onClick={() => reviewPayment(payment.id, "failed")}
+                            style={{ color: "#ff4444", borderColor: "rgba(255,68,68,0.3)" }}
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
         {filtered.length === 0 ? (
           <div className="card" style={{ padding: "var(--space-16)", textAlign: "center" }}>
             <p style={{ color: "var(--text-muted)", fontSize: 14 }}>No {tab} screens.</p>
