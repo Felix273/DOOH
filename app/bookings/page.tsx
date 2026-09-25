@@ -78,10 +78,11 @@ export default function AdvertiserBookingsPage() {
       .eq("id", id)
 
     if (error) {
-      setMessage(error.message)
+      setMessage(error.message.includes("campaign start date") ? "Approved bookings can only be cancelled before the campaign starts." : "We could not cancel this booking. Please try again.")
       return
     }
 
+    setMessage("Booking cancelled successfully.")
     await loadBookings()
   }
 
