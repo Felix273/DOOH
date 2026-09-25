@@ -63,6 +63,14 @@ function formatDate(value: string | null) {
   return new Intl.DateTimeFormat("en-KE", { dateStyle: "medium" }).format(parseDateKey(value))
 }
 
+function bookingErrorMessage(error: { code?: string; message?: string }) {
+  if (error.code === "23P01" || error.message?.includes("bookings_no_overlapping_active_periods")) {
+    return "Those dates were just taken by another campaign. Please choose a different available range."
+  }
+
+  return error.message ?? "We could not create the booking request. Please try again."
+}
+
 function AvailabilityCalendar({
   ranges,
   startDate,
@@ -229,6 +237,7 @@ export default function ScreenDetailPage() {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
+      setSubmitting(false)
       router.push(`/login?next=/screens/${screen.id}`)
       return
     }
@@ -250,7 +259,7 @@ export default function ScreenDetailPage() {
 
     setSubmitting(false)
     if (error) {
-      setMessage(error.message)
+      setMessage(bookingErrorMessage(error))
       return
     }
 
