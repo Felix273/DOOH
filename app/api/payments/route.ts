@@ -122,10 +122,15 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Payment and status are required" }, { status: 400 })
   }
 
+  if (!["completed", "failed"].includes(body.status)) {
+    return NextResponse.json({ error: "Invalid payment status" }, { status: 400 })
+  }
+
   const { data: payment, error: paymentError } = await auth.supabase
     .from("payments")
     .update({ status: body.status })
     .eq("id", body.paymentId)
+    .eq("status", "pending")
     .select("id, booking_id, status, provider_reference")
     .single()
 
